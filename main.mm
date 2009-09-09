@@ -4,6 +4,7 @@
 //
 //  Created by John Daniel on 3/22/09.
 //  Copyright Etresoft 2009. All rights reserved.
+//  modifications by lhagan 2009-09-08 to open in same window
 //
 
 #import <Cocoa/Cocoa.h>
@@ -55,77 +56,69 @@ int main(int argc, char *argv[])
         path = [URL path];
         }
       }
-     
-    // Find out if the Terminal is already running.
-    //bool terminalRunning = isTerminalRunning();
     
-    // Connect to the Terminal. It is running now...maybe with a blank
-    // terminal window.
+    // Connect to the Terminal. It is running now...maybe with a blank terminal window.
     TerminalApplication * terminal = [SBApplication applicationWithBundleIdentifier: @"com.apple.Terminal"];
-        
-    // Get the Terminal windows.
-    SBElementArray * terminalWindows = [terminal windows];
     
+	// create command to cd to selected folder and clear current Terminal contents
 	NSString * command = [NSString stringWithFormat: @"cd %@; clear", quotePath(path)];
 		
-    // If there is only a single window with a single tab, Terminal may 
-    // have been just launched. If so, I want to close the window.
-    //if([terminalWindows count] == 1)
-      for(TerminalWindow * terminalWindow in terminalWindows)
-        {
-        SBElementArray * windowTabs = [terminalWindow tabs];
-		[terminal doScript: command in: terminalWindow];
-        /*if([windowTabs count] == 1)
-          for(TerminalTab * tab in windowTabs)
-          
-            // If I started the Terminal, close the open window.
-            if(!terminalRunning)
-				[terminalWindow closeSaving: TerminalSaveOptionsNo savingIn: nil];*/
-        }
-       
-    // Create a "cd" command.
-    //NSString * command = [NSString stringWithFormat: @"cd %@; clear", quotePath(path)];
-    
-    // Run the script.
-    //[terminal doScript: command in: nil];
+    // Get the Terminal windows.
+    SBElementArray * terminalWindows = [terminal windows];
 		
-    // Wait for "a while" for the script to run and get a new window.
-    // I wish there was a better way to do this.
-    [NSThread sleepForTimeInterval: 0.1];
-    
-    // Activate the Terminal. Hopefully, the new window is already open and
-    // is will be brought to the front.
-    [terminal activate];
+	if ([terminalWindows count] != 0) {
+		// FIX ME: needs to find selected window, or choose one, not run on all windows
+		for(TerminalWindow * terminalWindow in terminalWindows)
+		{
+			// activate terminal before it can accept cmd-t (if needed)
+			[terminal activate];
+			
+			// get Terminal tabs
+			SBElementArray * windowTabs = [terminalWindow tabs];
+			
+			// go through tabs until we find the one that's selected
+			// if it's busy, open a new tab
+			for(TerminalTab * windowTab in windowTabs) {
+				
+				if ([windowTab selected]) {
+					if ([windowTab busy] == FALSE) {
+						
+						// run the command
+						[terminal doScript: command in: windowTab];
+					} else {
+						
+						NSDictionary* errorDict;
+						NSAppleEventDescriptor* returnDescriptor = NULL;
+						
+						// open a new tab
+						// there has to be a better way to do this
+						NSAppleScript* scriptObject = [[NSAppleScript alloc] initWithSource:
+													   @"\
+													   tell application \"System Events\"\n\
+													   tell process \"Terminal\" to keystroke \"t\" using command down\n\
+													   end\n\
+													   tell application \"Terminal\"\n\
+													   activate\n\
+													   end tell"];
+						
+						returnDescriptor = [scriptObject executeAndReturnError: &errorDict];
+						[scriptObject release];
+						
+						// run the command
+						[terminal doScript: command in: terminalWindow];
+					}
+				}
+			}
+		}
+	} else {
+		// run command in new window if none existed
+		[terminal doScript: command in: nil];
+		[terminal activate];
+	}
     
     [pool drain];
     }
   }
-
-// Determine if the terminal was already running.
-/*bool isTerminalRunning(void)
-  {
-  ProcessSerialNumber psn = { 0, kNoProcess };
-  
-  CFStringRef name;
-  
-  // Uhmmmm. Carbon...
-  while(!GetNextProcess(& psn))
-    {
-    if(!CopyProcessName(& psn, & name))
-      {
-      bool isTerminal = !CFStringCompare(CFSTR("Terminal"), name, 0);
-      
-      NSLog((NSString *) name);
-      
-      CFRelease(name);
-      
-      if(isTerminal)
-        return true;
-      }
-    }
-    
-  return false;
-  }*/
   
 // Calculate the quoted representation of a path.
 // AppleScript has a "quoted form of POSIX path" which isn't quite as
