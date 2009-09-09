@@ -12,7 +12,7 @@
 #import "SBApplicationExtensions.h"
 
 // Find out if the terminal is running to close the blank window.
-bool isTerminalRunning(void);
+//bool isTerminalRunning(void);
 
 // Calculate the quoted representation of a path.
 NSString * quotePath(NSString * path);
@@ -27,9 +27,7 @@ int main(int argc, char *argv[])
     NSString * path = [@"~" stringByExpandingTildeInPath];
     
     // Connect to the Finder.
-    FinderApplication * finder = 
-      [SBApplication 
-        quietApplicationWithBundleIdentifier: @"com.apple.Finder"];
+    FinderApplication * finder = [SBApplication quietApplicationWithBundleIdentifier: @"com.apple.Finder"];
       
     // Get the open Finder windows.
     SBElementArray * finderWindows = [finder FinderWindows];
@@ -59,40 +57,38 @@ int main(int argc, char *argv[])
       }
      
     // Find out if the Terminal is already running.
-    bool terminalRunning = isTerminalRunning();
+    //bool terminalRunning = isTerminalRunning();
     
     // Connect to the Terminal. It is running now...maybe with a blank
     // terminal window.
-    TerminalApplication * terminal = 
-      [SBApplication 
-        applicationWithBundleIdentifier: @"com.apple.Terminal"];
+    TerminalApplication * terminal = [SBApplication applicationWithBundleIdentifier: @"com.apple.Terminal"];
         
     // Get the Terminal windows.
     SBElementArray * terminalWindows = [terminal windows];
     
+	NSString * command = [NSString stringWithFormat: @"cd %@; clear", quotePath(path)];
+		
     // If there is only a single window with a single tab, Terminal may 
     // have been just launched. If so, I want to close the window.
-    if([terminalWindows count] == 1)
+    //if([terminalWindows count] == 1)
       for(TerminalWindow * terminalWindow in terminalWindows)
         {
         SBElementArray * windowTabs = [terminalWindow tabs];
-      
-        if([windowTabs count] == 1)
+		[terminal doScript: command in: terminalWindow];
+        /*if([windowTabs count] == 1)
           for(TerminalTab * tab in windowTabs)
           
             // If I started the Terminal, close the open window.
             if(!terminalRunning)
-              [terminalWindow 
-                closeSaving: TerminalSaveOptionsNo savingIn: nil];
+				[terminalWindow closeSaving: TerminalSaveOptionsNo savingIn: nil];*/
         }
-        
+       
     // Create a "cd" command.
-    NSString * command = 
-      [NSString stringWithFormat: @"cd %@; clear", quotePath(path)];
+    //NSString * command = [NSString stringWithFormat: @"cd %@; clear", quotePath(path)];
     
     // Run the script.
-    [terminal doScript: command in: nil];
-    
+    //[terminal doScript: command in: nil];
+		
     // Wait for "a while" for the script to run and get a new window.
     // I wish there was a better way to do this.
     [NSThread sleepForTimeInterval: 0.1];
@@ -106,7 +102,7 @@ int main(int argc, char *argv[])
   }
 
 // Determine if the terminal was already running.
-bool isTerminalRunning(void)
+/*bool isTerminalRunning(void)
   {
   ProcessSerialNumber psn = { 0, kNoProcess };
   
@@ -129,7 +125,7 @@ bool isTerminalRunning(void)
     }
     
   return false;
-  }
+  }*/
   
 // Calculate the quoted representation of a path.
 // AppleScript has a "quoted form of POSIX path" which isn't quite as
