@@ -9,10 +9,8 @@
 #import <Cocoa/Cocoa.h>
 #import "Terminal.h"
 #import "Finder.h"
+#import "SystemEvents.h"
 #import "SBApplicationExtensions.h"
-
-// Find out if the terminal is running to close the blank window.
-bool isTerminalRunning(void);
 
 // Calculate the quoted representation of a path.
 NSString * quotePath(NSString * path);
@@ -22,115 +20,131 @@ int main(int argc, char *argv[])
   if(NSApplicationLoad())
     {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-
+    
     // Get a default path.
-    NSString * path = [@"~" stringByExpandingTildeInPath];
+    NSString * path = nil;
     
     // Connect to the Finder.
     FinderApplication * finder = 
       [SBApplication 
         quietApplicationWithBundleIdentifier: @"com.apple.Finder"];
       
-    // Get the open Finder windows.
-    SBElementArray * finderWindows = [finder FinderWindows];
+    // Get the current selection.
+    SBObject * selection = finder.selection;
     
-    // Try to find the frontmost Finder window and the path to its 
-    // location.
-    if([finderWindows count] > 0)
+    NSArray * items = [selection get];
+    
+    // Ignore selection if there are multiple items selected.
+    if([items count] == 1)
       {
-      // Find the frontmost Finder window.
-      FinderFinderWindow * frontmostWindow = nil;
+      FinderItem * item = [items objectAtIndex: 0];
       
-      for (FinderFinderWindow * finderWindow in finderWindows)
+      NSString * itemPath = [[NSURL URLWithString: item.URL] path];
+      
+      NSString * type =
+        [[[NSFileManager defaultManager]
+          attributesOfItemAtPath: itemPath error: 0]
+          fileType];
+      
+      // If the selected item is a folder, use it as the "here".
+      if([type isEqualToString: NSFileTypeDirectory])
+        path = itemPath;
+
+      else
+        path = [itemPath stringByDeletingLastPathComponent];
+      }
+    
+    // If I don't have a path yet, look through the open Finder windows.
+    if(!path)
+      {
+      // Get the open Finder windows.
+      SBElementArray * finderWindows = [finder FinderWindows];
+      
+      // Try to find the frontmost Finder window and the path to its 
+      // location.
+      if([finderWindows count] > 0)
         {
-        if(!frontmostWindow || (finderWindow.index < frontmostWindow.index))
-          frontmostWindow = finderWindow;
-        }
+        // Find the frontmost Finder window.
+        FinderFinderWindow * frontmostWindow = nil;
         
-      // Get the path for the frontmost window.
-      if(frontmostWindow)
-        {
-        SBObject * target = frontmostWindow.target;
-        FinderItem * item = [target get];
-        NSURL * URL = [NSURL URLWithString: item.URL];
-        
-        path = [URL path];
+        for (FinderFinderWindow * finderWindow in finderWindows)
+          {
+          if(!frontmostWindow || (finderWindow.index < frontmostWindow.index))
+            frontmostWindow = finderWindow;
+          }
+          
+        // Get the path for the frontmost window.
+        if(frontmostWindow)
+          {
+          SBObject * target = frontmostWindow.target;
+          FinderItem * item = [target get];
+          NSURL * URL = [NSURL URLWithString: item.URL];
+          
+          path = [URL path];
+          }
         }
       }
-     
-    // Find out if the Terminal is already running.
-    bool terminalRunning = isTerminalRunning();
-    
+
+    // Provide a fallback.
+    if(!path)
+      path = [@"~" stringByExpandingTildeInPath];
+
     // Connect to the Terminal. It is running now...maybe with a blank
     // terminal window.
     TerminalApplication * terminal = 
       [SBApplication 
         applicationWithBundleIdentifier: @"com.apple.Terminal"];
         
+    // Find out if the Terminal is already running.
+    bool terminalWasRunning = [terminal isRunning];
+    
     // Get the Terminal windows.
     SBElementArray * terminalWindows = [terminal windows];
     
+    TerminalTab * currentTab = nil;
+    
     // If there is only a single window with a single tab, Terminal may 
-    // have been just launched. If so, I want to close the window.
-    if([terminalWindows count] == 1)
+    // have been just launched. If so, I want to use the new window.
+    if(!terminalWasRunning)
       for(TerminalWindow * terminalWindow in terminalWindows)
         {
         SBElementArray * windowTabs = [terminalWindow tabs];
       
-        if([windowTabs count] == 1)
-          for(TerminalTab * tab in windowTabs)
-          
-            // If I started the Terminal, close the open window.
-            if(!terminalRunning)
-              [terminalWindow 
-                closeSaving: TerminalSaveOptionsNo savingIn: nil];
+        for(TerminalTab * tab in windowTabs)
+          currentTab = tab;
         }
         
     // Create a "cd" command.
     NSString * command = 
-      [NSString stringWithFormat: @"cd %@; clear", quotePath(path)];
+      [NSString
+        stringWithFormat: 
+         @"cd %@;echo -ne \"\\033]2;%@\\007\"", quotePath(path), path];
     
     // Run the script.
-    [terminal doScript: command in: nil];
+    [terminal doScript: command in: currentTab];
     
-    // Wait for "a while" for the script to run and get a new window.
-    // I wish there was a better way to do this.
-    [NSThread sleepForTimeInterval: 0.1];
+    // Get the System Events application.
+    SystemEventsApplication * systemEvents = 
+      [SBApplication 
+        applicationWithBundleIdentifier: @"com.apple.SystemEvents"];
     
     // Activate the Terminal. Hopefully, the new window is already open and
     // is will be brought to the front.
     [terminal activate];
     
+    // If System Events are enabled, send the Command K keystroke to the 
+    // Terminal.
+    // This doesn't seem to matter in Snow Leopard.
+    //if(systemEvents.UIElementsEnabled)
+    
+    [systemEvents keystroke: @"k" using: SystemEventsEMdsCommandDown];
+    
     [pool drain];
     }
+    
+  return 0;
   }
 
-// Determine if the terminal was already running.
-bool isTerminalRunning(void)
-  {
-  ProcessSerialNumber psn = { 0, kNoProcess };
-  
-  CFStringRef name;
-  
-  // Uhmmmm. Carbon...
-  while(!GetNextProcess(& psn))
-    {
-    if(!CopyProcessName(& psn, & name))
-      {
-      bool isTerminal = !CFStringCompare(CFSTR("Terminal"), name, 0);
-      
-      NSLog((NSString *) name);
-      
-      CFRelease(name);
-      
-      if(isTerminal)
-        return true;
-      }
-    }
-    
-  return false;
-  }
-  
 // Calculate the quoted representation of a path.
 // AppleScript has a "quoted form of POSIX path" which isn't quite as
 // good as the Finder's drag-n-drop conversion. Here, I will try to

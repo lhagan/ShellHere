@@ -10,10 +10,9 @@
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		A5AC8EE10F7C5E340062B612 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5AC8EDD0F7C5E340062B612 /* main.mm */; };
-		A5AC8EE20F7C5E340062B612 /* SBApplicationExtensions.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5AC8EDF0F7C5E340062B612 /* SBApplicationExtensions.mm */; };
+		A5AC8EE10F7C5E340062B612 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A5AC8EDD0F7C5E340062B612 /* main.m */; };
+		A5AC8EE20F7C5E340062B612 /* SBApplicationExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = A5AC8EDF0F7C5E340062B612 /* SBApplicationExtensions.m */; };
 		A5AC8F010F7C5FB00062B612 /* ShellHere.icns in Resources */ = {isa = PBXBuildFile; fileRef = A5AC8F000F7C5FB00062B612 /* ShellHere.icns */; };
-		A5AC8F050F7C5FF40062B612 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5AC8F040F7C5FF40062B612 /* Carbon.framework */; };
 		A5AC8F070F7C60000062B612 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5AC8F060F7C60000062B612 /* ScriptingBridge.framework */; };
 /* End PBXBuildFile section */
 
@@ -28,13 +27,13 @@
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* ShellHere.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShellHere.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5AC8EDC0F7C5E340062B612 /* Finder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Finder.h; sourceTree = "<group>"; };
-		A5AC8EDD0F7C5E340062B612 /* main.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
+		A5AC8EDD0F7C5E340062B612 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		A5AC8EDE0F7C5E340062B612 /* SBApplicationExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBApplicationExtensions.h; sourceTree = "<group>"; };
-		A5AC8EDF0F7C5E340062B612 /* SBApplicationExtensions.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SBApplicationExtensions.mm; sourceTree = "<group>"; };
+		A5AC8EDF0F7C5E340062B612 /* SBApplicationExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SBApplicationExtensions.m; sourceTree = "<group>"; };
 		A5AC8EE00F7C5E340062B612 /* Terminal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Terminal.h; sourceTree = "<group>"; };
 		A5AC8F000F7C5FB00062B612 /* ShellHere.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = ShellHere.icns; sourceTree = "<group>"; };
-		A5AC8F040F7C5FF40062B612 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		A5AC8F060F7C60000062B612 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
+		A5CAE5ED12D0DCE8009B0F1D /* SystemEvents.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemEvents.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,7 +42,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
-				A5AC8F050F7C5FF40062B612 /* Carbon.framework in Frameworks */,
 				A5AC8F070F7C60000062B612 /* ScriptingBridge.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -55,8 +53,9 @@
 			isa = PBXGroup;
 			children = (
 				A5AC8EDE0F7C5E340062B612 /* SBApplicationExtensions.h */,
-				A5AC8EDF0F7C5E340062B612 /* SBApplicationExtensions.mm */,
+				A5AC8EDF0F7C5E340062B612 /* SBApplicationExtensions.m */,
 				A5AC8EDC0F7C5E340062B612 /* Finder.h */,
+				A5CAE5ED12D0DCE8009B0F1D /* SystemEvents.h */,
 				A5AC8EE00F7C5E340062B612 /* Terminal.h */,
 			);
 			name = Classes;
@@ -66,7 +65,6 @@
 			isa = PBXGroup;
 			children = (
 				A5AC8F060F7C60000062B612 /* ScriptingBridge.framework */,
-				A5AC8F040F7C5FF40062B612 /* Carbon.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 			);
 			name = "Linked Frameworks";
@@ -105,7 +103,7 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
-				A5AC8EDD0F7C5E340062B612 /* main.mm */,
+				A5AC8EDD0F7C5E340062B612 /* main.m */,
 				32CA4F630368D1EE00C91783 /* ShellHere_Prefix.pch */,
 			);
 			name = "Other Sources";
@@ -159,7 +157,14 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "ShellHere" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* ShellHere */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -187,8 +192,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A5AC8EE10F7C5E340062B612 /* main.mm in Sources */,
-				A5AC8EE20F7C5E340062B612 /* SBApplicationExtensions.mm in Sources */,
+				A5AC8EE10F7C5E340062B612 /* main.m in Sources */,
+				A5AC8EE20F7C5E340062B612 /* SBApplicationExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
