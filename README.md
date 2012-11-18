@@ -5,6 +5,8 @@ ShellHere is an OS X Finder toolbar app that opens the current Finder location i
 * opens Finder location in the current Terminal window/tab (if one exists) instead of opening a new window
 * beautiful, native-looking icon by [Henrik Nyh](http://henrik.nyh.se/octopress/2007/10/open-terminal-here-and-glob-select-in-leopard-finder/), used with permission under the [CC BY 3.0 license](http://creativecommons.org/licenses/by/3.0/)
 
+![](https://raw.github.com/lhagan/ShellHere/master/shellhere-screenshot.jpg)
+
 ## Download & Install
 
 Download the disk image [here](https://github.com/downloads/lhagan/ShellHere/ShellHere.dmg) and drag ShellHere to your Applications folder. Then just drag it onto your Finder toolbar.
