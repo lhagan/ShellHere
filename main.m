@@ -5,6 +5,10 @@
 //  Created by John Daniel on 3/22/09.
 //  Copyright Etresoft 2009. All rights reserved.
 //
+//  Modified 2009-09-08, 2012-11-17 by Luke Hagan <lukehagan.com>
+//  to reuse existing Terminal window/tab and open a new tab in current window
+//  if current tab is busy.
+//
 
 #import <Cocoa/Cocoa.h>
 #import "Terminal.h"
@@ -14,6 +18,9 @@
 
 // Calculate the quoted representation of a path.
 NSString * quotePath(NSString * path);
+
+// helper function to get terminal's current tab
+TerminalTab * getCurrentTab(TerminalApplication * terminal);
 
 int main(int argc, char *argv[])
   {
@@ -96,48 +103,40 @@ int main(int argc, char *argv[])
         applicationWithBundleIdentifier: @"com.apple.Terminal"];
         
     // Find out if the Terminal is already running.
-    bool terminalWasRunning = [terminal isRunning];
-    
-    // Get the Terminal windows.
-    SBElementArray * terminalWindows = [terminal windows];
+    //bool terminalWasRunning = [terminal isRunning];
     
     TerminalTab * currentTab = nil;
     
-    // If there is only a single window with a single tab, Terminal may 
-    // have been just launched. If so, I want to use the new window.
-    if(!terminalWasRunning)
-      for(TerminalWindow * terminalWindow in terminalWindows)
-        {
-        SBElementArray * windowTabs = [terminalWindow tabs];
+    // get the current tab
+    currentTab = getCurrentTab(terminal);
       
-        for(TerminalTab * tab in windowTabs)
-          currentTab = tab;
-        }
-        
-    // Create a "cd" command.
-    NSString * command = 
+    // create command to cd to selected folder and clear current Terminal contents
+    NSString * command =
       [NSString
-        stringWithFormat: 
-         @"cd %@;echo -ne \"\\033]2;%@\\007\"", quotePath(path), path];
+        stringWithFormat: @"cd %@; clear", quotePath(path)];
     
-    // Run the script.
-    [terminal doScript: command in: currentTab];
-    
-    // Get the System Events application.
-    SystemEventsApplication * systemEvents = 
-      [SBApplication 
-        applicationWithBundleIdentifier: @"com.apple.SystemEvents"];
-    
-    // Activate the Terminal. Hopefully, the new window is already open and
-    // is will be brought to the front.
+    // Activate the Terminal.
     [terminal activate];
     
-    // If System Events are enabled, send the Command K keystroke to the 
-    // Terminal.
-    // This doesn't seem to matter in Snow Leopard.
-    //if(systemEvents.UIElementsEnabled)
-    
-    [systemEvents keystroke: @"k" using: SystemEventsEMdsCommandDown];
+    // if tab is busy, open a new tab
+    if ([currentTab busy]) {
+      
+      // Get the System Events application.
+      SystemEventsApplication * systemEvents =
+        [SBApplication
+          applicationWithBundleIdentifier: @"com.apple.SystemEvents"];
+      
+      // if System Events are enabled, send the Command T keystroke to open a new tab
+      if(systemEvents.UIElementsEnabled) {
+        [systemEvents keystroke: @"t" using: SystemEventsEMdsCommandDown];
+      }
+      
+      // get the current tab
+      currentTab = getCurrentTab(terminal);
+    }
+
+    // Run the script.
+    [terminal doScript: command in: currentTab];
     
     [pool drain];
     }
@@ -196,3 +195,29 @@ NSString * quotePath(NSString * path)
     
   return [quotedPath autorelease];
   }
+
+//
+// helper function to get terminal's current tab
+//
+TerminalTab * getCurrentTab(TerminalApplication * terminal) {
+  TerminalTab * currentTab = nil;
+  
+  // Get the Terminal windows.
+  SBElementArray * terminalWindows = [terminal windows];
+  
+  // find frontmost Terminal window
+  TerminalWindow * frontmostWindow = nil;
+  for(TerminalWindow * terminalWindow in terminalWindows) {
+    if(!frontmostWindow || (terminalWindow.index < frontmostWindow.index))
+        frontmostWindow = terminalWindow;
+    }
+      
+  // find current tab
+  SBElementArray * windowTabs = [frontmostWindow tabs];
+  for(TerminalTab * tab in windowTabs) {
+      if ([tab selected]) {
+        currentTab = tab;
+      }
+  }
+  return currentTab;
+}
