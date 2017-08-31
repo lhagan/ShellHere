@@ -9,6 +9,6 @@ ShellHere is an OS X Finder toolbar app that opens the current Finder location i
 
 ## Download & Install
 
-Download the disk image [here](https://github.com/downloads/lhagan/ShellHere/ShellHere.dmg) and drag ShellHere to your Applications folder. Then just drag it onto your Finder toolbar.
+Download the disk image [here](https://github.com/downloads/lhagan/ShellHere/ShellHere.dmg) and drag ShellHere to your Applications folder. Then just drag it onto your Finder toolbar. On newer versions of macOS, you may have to hold down Command while dragging to the Finder toolbar. Look for the green plus sign before dropping it.
 
 OS X 10.7 or greater is required. It should work all the way back to 10.5, but you'll have to download the sources and build yourself.
